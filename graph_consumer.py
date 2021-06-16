@@ -1,10 +1,17 @@
 import pika
 import pandas
-import sqlite3
+import plotly.offline
+import plotly.graph_objs as go
+from processing import build_dataframe
 
 
 class GraphConsumer:
     def __init__(self):
+        """
+        initiating the class, creating the connection to pika (rabbitmq python's module)
+        receiving the ok to create or update the graph
+        after getting the data from the data base, processing it and passing it to the graph
+        """
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
         self.channel = self.connection.channel()
@@ -21,38 +28,50 @@ class GraphConsumer:
         self.channel.queue_declare(queue='database_to_graph')
 
     def callback(self, channel, method, properties, body):
+        """
+        when the queue is receiving data the callback method is invoked
+        :param channel: channel of communication
+        :type channel: pika.channel.Channel
+        :param method: used to acknowledge the message
+        :type method: pika.spec.Basic.Deliver
+        :param properties: user-defined properties on the message
+        :type properties: pika.spec.BasicProperties
+        :type body: bytes
+        """
         db_name = body.decode()
         print(f"Graph Consumer received the name of the database: {db_name}")
-        self.build_dataframe(db_name)
-
+        self.graph_dataframe = build_dataframe(db_name)
+        self.build_graph()
         with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
             print(self.graph_dataframe)
 
     def consume(self):
+        """
+        consume means to listen to the queue forever until some data comes,
+        then process it, then continue listening
+        """
         self.channel.basic_consume(queue='database_to_graph', on_message_callback=self.callback, auto_ack=True)
 
     def keep_consume(self):
-        print(' [***] Waiting for messages. To exit press CTRL+C')
+        """
+        this command gives the flag to start consuming, but never stops
+        """
+        print('GraphConsumer is Waiting for messages. To exit press CTRL+C')
         self.channel.start_consuming()
 
-    def build_dataframe(self, db_name):
-        database_connection = sqlite3.connect('database/invoices.db')
-        dataframe = pandas.read_sql_query(
-            '''SELECT CustomerId, InvoiceDate, Total FROM ''' + db_name,
-            database_connection
-        )
-        database_connection.close()
+    def build_graph(self):
+        """
+        initial graph, not final
+        :return:
+        """
+        dates = self.graph_dataframe['InvoiceDate'].tolist()
+        totals = self.graph_dataframe['Total'].tolist()
+        layout = go.Layout(xaxis=dict(tickmode='array', tickvals=dates, ticktext=dates))
 
-        dataframe.loc[:, 'InvoiceDate'] = pandas.to_datetime(dataframe['InvoiceDate']).dt.strftime('%Y-%m')
-
-        customer_count_dataframe = dataframe.copy()
-        customer_count_dataframe = customer_count_dataframe.drop_duplicates(subset=['CustomerId', 'InvoiceDate'])
-        customer_count_dataframe = customer_count_dataframe.groupby(['InvoiceDate']).size().reset_index(name="Count")
-
-        total_sum_dataframe = dataframe.copy()
-        total_sum_dataframe = total_sum_dataframe.groupby(['InvoiceDate'])['Total'].sum()
-
-        self.graph_dataframe = customer_count_dataframe.merge(total_sum_dataframe, how='inner', on='InvoiceDate')
+        plotly.offline.plot({
+            "data": [go.Scatter(x=dates, y=totals)],
+            "layout": layout
+        })
 
 
 if __name__ == '__main__':
