@@ -25,7 +25,7 @@ class Producer:
         :return: str
         """
         self.channel.basic_publish(exchange='', routing_key='files_to_database', body=byte_string)
-        return "Sent"
+        return f"Sent {byte_string.decode()}"
 
     def close(self):
         """

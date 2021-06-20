@@ -1,6 +1,8 @@
-import sqlite3
+import os
 import pandas
-database_path = 'database/invoices.db'
+import sqlite3
+
+database_path = os.path.abspath(os.path.dirname(__file__) + os.path.join('/database/invoices.db'))
 
 
 class DatabaseHandler:
@@ -26,7 +28,7 @@ class DatabaseHandler:
         try:
             self.connection = sqlite3.connect(self.path)
             print("Database Connection Established")
-            # return self.connection
+            return self.connection
         except sqlite3.Error as e:
             print("Connection failed: ", e.args[0])
             return -1
@@ -88,3 +90,12 @@ class DatabaseHandler:
         cursor = self.connection.cursor()
         cursor.execute(query)
         print("1 Table Created Successfully")
+
+    def clear_table(self, query: str):
+        """
+        clearing all rows from table in database
+        :param query: delete query with table name embedded
+        """
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        print("Deleted All Rows")

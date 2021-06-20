@@ -1,8 +1,5 @@
 import pika
-import pandas
-import plotly.offline
-import plotly.graph_objs as go
-from processing import build_dataframe
+from processing import build_dataframe, build_graph
 
 
 class GraphConsumer:
@@ -15,7 +12,6 @@ class GraphConsumer:
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
         self.channel = self.connection.channel()
-        self.graph_dataframe = pandas.DataFrame()
         self.declare()
         self.consume()
         self.keep_consume()
@@ -40,10 +36,8 @@ class GraphConsumer:
         """
         db_name = body.decode()
         print(f"Graph Consumer received the name of the database: {db_name}")
-        self.graph_dataframe = build_dataframe(db_name)
-        self.build_graph()
-        with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-            print(self.graph_dataframe)
+        graph_dataframe = build_dataframe(db_name)
+        build_graph(graph_dataframe)
 
     def consume(self):
         """
@@ -58,20 +52,6 @@ class GraphConsumer:
         """
         print('GraphConsumer is Waiting for messages. To exit press CTRL+C')
         self.channel.start_consuming()
-
-    def build_graph(self):
-        """
-        initial graph, not final
-        :return:
-        """
-        dates = self.graph_dataframe['InvoiceDate'].tolist()
-        totals = self.graph_dataframe['Total'].tolist()
-        layout = go.Layout(xaxis=dict(tickmode='array', tickvals=dates, ticktext=dates))
-
-        plotly.offline.plot({
-            "data": [go.Scatter(x=dates, y=totals)],
-            "layout": layout
-        })
 
 
 if __name__ == '__main__':
