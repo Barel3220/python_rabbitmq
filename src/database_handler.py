@@ -2,7 +2,7 @@ import os
 import pandas
 import sqlite3
 
-database_path = os.path.abspath(os.path.dirname(__file__) + os.path.join('/database/invoices.db'))
+database_path = os.path.normpath(os.path.dirname(__file__) + os.path.join('/database/invoices.db'))
 
 
 class DatabaseHandler:
@@ -47,12 +47,15 @@ class DatabaseHandler:
         :param query: select query from the database
         :return: list
         """
-        cursor = self.connection.cursor()
-        cursor.execute(query)
-        results = cursor.fetchall()
-        print(f"Extracted {len(results)} Records from the Database")
-        self.close()
-        return results
+        try:
+            cursor = self.connection.cursor()
+            results = cursor.execute(query).fetchall()
+            print(f"Extracted {len(results)} Records from the Database")
+            self.close()
+            return results
+        except sqlite3.OperationalError as e:
+            print("Selection failed: ", e.args[0])
+            return -1
 
     def insert_many(self, query: str, data):
         """
@@ -63,39 +66,55 @@ class DatabaseHandler:
         :type data: list/_reader,
         :return:
         """
-        cursor = self.connection.cursor()
-        cursor.executemany(query, data)
-        results = cursor.fetchall()
-        self.connection.commit()
-        print(f"Inserted {len(results)} Records to the Database")
-        self.close()
-        return results
+        try:
+            # if the 'with' block succeed the data is committed
+            # otherwise a rollback is called
+            with self.connection:
+                self.connection.executemany(query, data)
+            print(f"Inserted {len(data)} Records to the Database")
+            self.close()
+            return f"Inserted {len(data)} Records"
+        except sqlite3.OperationalError as e:
+            print("Insertion failed: ", e.args[0])
+            return -1
 
-    def to_dataframe(self, headers: list, db_name: str):
+    def to_dataframe(self, headers: list, table_name: str):
         """
         getting a list of str of the column names, then returning the dataframe from the pandas method
         :param headers: list of the columns the user want to get back
-        :param db_name: table name
+        :param table_name: table name
         :return: pandas.Dataframe
         """
-        str_from_headers = ', '.join(headers)
-        query = '''SELECT ''' + str_from_headers + ''' FROM ''' + db_name
-        return pandas.read_sql_query(query, self.connection)
+        try:
+            str_from_headers = ', '.join(headers)
+            query = '''SELECT ''' + str_from_headers + ''' FROM ''' + table_name
+            return pandas.read_sql_query(query, self.connection)
+        except pandas.io.sql.DatabaseError as e:
+            print("pandas.read_sql_query failed: ", e.args[0])
+            return -1
 
     def create_table(self, query: str):
         """
         creating table in the database
         :param query: create query with the table name embedded
         """
-        cursor = self.connection.cursor()
-        cursor.execute(query)
-        print("1 Table Created Successfully")
+        try:
+            with self.connection:
+                self.connection.execute(query)
+            return "1 Table Created Successfully"
+        except sqlite3.OperationalError as e:
+            print("Creation failed: ", e.args[0])
+            return -1
 
     def clear_table(self, query: str):
         """
         clearing all rows from table in database
         :param query: delete query with table name embedded
         """
-        cursor = self.connection.cursor()
-        cursor.execute(query)
-        print("Deleted All Rows")
+        try:
+            with self.connection:
+                self.connection.execute(query)
+            return "Deleted All Rows"
+        except sqlite3.OperationalError as e:
+            print("Deletion failed: ", e.args[0])
+            return -1

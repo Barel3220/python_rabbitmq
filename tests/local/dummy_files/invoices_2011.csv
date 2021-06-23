@@ -1,0 +1,5 @@
+InvoiceId,CustomerId,InvoiceDate,BillingAddress,BillingCity,BillingState,BillingCountry,BillingPostalCode,Total
+250,55,2012-01-01 00:00:00,421 Bourke Street,Sidney,NSW,Australia,2010,2703.14
+251,10,2012-01-09 00:00:00,"Rua Dr. Falcão Filho, 155",São Paulo,SP,Brazil,01007-010,363.01
+252,11,2012-01-22 00:00:00,"Av. Paulista, 2022",São Paulo,SP,Brazil,01310-200,504.98
+253,13,2012-01-22 00:00:00,Qe 7 Bloco G,Brasília,DF,Brazil,71020-677,1752.02

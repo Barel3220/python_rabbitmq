@@ -1,5 +1,5 @@
 import pika
-from processing import process_file
+from src.processing import process_file
 
 
 class DatabaseConsumer:
@@ -14,7 +14,6 @@ class DatabaseConsumer:
         self.channel = self.connection.channel()
         self.declare()
         self.consume()
-        self.keep_consume()
 
     def callback(self, channel, method, properties, body):
         """
@@ -48,7 +47,7 @@ class DatabaseConsumer:
         :return: str
         """
         self.channel.basic_publish(exchange='', routing_key='database_to_graph', body=byte_string)
-        return f"Sent {byte_string}"
+        return f"Sent {byte_string.decode()}"
 
     def consume(self):
         """
@@ -66,4 +65,5 @@ class DatabaseConsumer:
 
 
 if __name__ == '__main__':
-    DatabaseConsumer()
+    database_consumer = DatabaseConsumer()
+    database_consumer.keep_consume()

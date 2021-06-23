@@ -1,5 +1,5 @@
 import pika
-from processing import build_dataframe, build_graph
+from src.processing import graph_consumer_callback
 
 
 class GraphConsumer:
@@ -23,28 +23,12 @@ class GraphConsumer:
         """
         self.channel.queue_declare(queue='database_to_graph')
 
-    def callback(self, channel, method, properties, body):
-        """
-        when the queue is receiving data the callback method is invoked
-        :param channel: channel of communication
-        :type channel: pika.channel.Channel
-        :param method: used to acknowledge the message
-        :type method: pika.spec.Basic.Deliver
-        :param properties: user-defined properties on the message
-        :type properties: pika.spec.BasicProperties
-        :type body: bytes
-        """
-        db_name = body.decode()
-        print(f"Graph Consumer received the name of the database: {db_name}")
-        graph_dataframe = build_dataframe(db_name)
-        build_graph(graph_dataframe)
-
     def consume(self):
         """
         consume means to listen to the queue forever until some data comes,
         then process it, then continue listening
         """
-        self.channel.basic_consume(queue='database_to_graph', on_message_callback=self.callback, auto_ack=True)
+        self.channel.basic_consume(queue='database_to_graph', on_message_callback=graph_consumer_callback, auto_ack=True)
 
     def keep_consume(self):
         """
