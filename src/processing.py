@@ -8,6 +8,7 @@ figure_path = os.path.normpath(os.path.dirname(__file__) + os.path.join('/databa
 
 def process_file(file_path: str, file_type: str, table_name: str):
     """
+    if database directory isn't exists, creating it
     getting the file path, file type, and table name
     opening the file then inserting all the data into the database
     :param file_path: filepath normal to the operating system
@@ -15,6 +16,8 @@ def process_file(file_path: str, file_type: str, table_name: str):
     :param table_name: table name
     :return: str from database_handler, 0 in case of exception
     """
+    if not os.path.exists(database_path):
+        os.mkdir(os.path.dirname(database_path))
     database_connection = establish_connection(database_path)
     create_table_if_not_exist(database_connection, table_name)
 

@@ -1,6 +1,8 @@
 import os
 import time
+import shutil
 from src.producer import Producer
+from src.database_handler import database_path
 path_list = [
         ["C:/Users/barel/Desktop/Files/invoices_2009.json", "json", "invoices"],
         ["C:/Users/barel/Desktop/Files/invoices_2010.json", "json", "invoices"],
@@ -18,6 +20,7 @@ def main(sleep_amount: float, _path_list: list) -> str:
     :param _path_list: strings list of lists
     :return: str
     """
+
     producer = Producer()
 
     if check_same_table_list(_path_list):
@@ -27,7 +30,8 @@ def main(sleep_amount: float, _path_list: list) -> str:
                 if check_type(item[0], item[1]):
                     producer.publish(create_metadata(item[0], item[1], item[2]))
                     # waiting 4 seconds between runs - to see the update in progress
-                    time.sleep(sleep_amount)
+                    if item != _path_list[-1]:
+                        time.sleep(sleep_amount)
                 else:
                     return f"{item[0].split('.')[-1]}, {item[1].lower()} - " \
                            f"there is differences between file types, skipping to next"
@@ -36,8 +40,21 @@ def main(sleep_amount: float, _path_list: list) -> str:
         producer.close()
     else:
         return "Not all tables in list are the same as should, closing app. . ."
-
+    # cleanup()
     return "All Done Successfully"
+
+
+# Cleanup function:
+# ----------------
+# This cleanup supposed to clean the database assets in order to
+# keep the developers environment clean, I commented this function due to concurrency issue.
+
+# The database cursor is a sub-process that is using the database during the run, and in this function we
+# are deleting the database directory after the run, the reason sleep() is needed is because
+# there's a "race" between the cleanup() and the cursor.close()
+# def cleanup():
+#     time.sleep(6)
+#     shutil.rmtree(os.path.dirname(database_path))
 
 
 def check_same_table_list(_path_list: list) -> bool:
