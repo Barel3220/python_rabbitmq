@@ -130,7 +130,11 @@ class TestProcessing(unittest.TestCase):
         cls.database_connection.close()
 
 
-def get_equal_dataframe():
+def get_equal_dataframe() -> pandas.DataFrame:
+    """
+    creating a duplicate dataframe for testing
+    :return: returning it
+    """
     data = {
         'InvoiceDate': ['2009-01', '2012-01'],
         'Count': [4, 4],
@@ -139,7 +143,13 @@ def get_equal_dataframe():
     return pandas.DataFrame(data, columns=['InvoiceDate', 'Count', 'Total'])
 
 
-def get_file_reply(file_path, file_type):
+def get_file_reply(file_path: str, file_type: str):
+    """
+    creating a connection, creating table if needed, reading file, ordering columns, and inserting it
+    :param file_path: string of file path
+    :param file_type: CSV/JSON
+    :return: str, 0 in case of exception
+    """
     database_connection = processing.establish_connection(database_path)
     processing.create_table_if_not_exist(database_connection, table_name)
     insert_many_query = processing.get_insert_many_query(table_name)
@@ -156,7 +166,12 @@ def get_file_reply(file_path, file_type):
     return database_connection.insert_many(insert_many_query, dataframe.values.tolist())
 
 
-def get_dataframe():
+def get_dataframe() -> pandas.DataFrame:
+    """
+    creating a connection, extracting from database and getting dataframe,
+    and after working it, returning merged dataframe
+    :return: dataframe of 3 columns ['CustomerId', 'InvoiceDate', 'Total']
+    """
     database_connection = processing.establish_connection(database_path)
     dataframe = database_connection.to_dataframe(['CustomerId', 'InvoiceDate', 'Total'], table_name)
     database_connection.close()
@@ -170,15 +185,26 @@ def get_dataframe():
 
 
 def insert_good_data():
+    """
+    inserting good data into the database prior to dataframe request
+    """
     get_file_reply(files[0][0], files[0][1])
     get_file_reply(files[1][0], files[1][1])
 
 
 def insert_bad_data():
+    """
+    inserting bad data into the database prior to dataframe request
+    """
     get_file_reply(files[2][0], files[2][1])
 
 
-def get_alter_dataframe(database_connection):
+def get_alter_dataframe(database_connection: DatabaseHandler) -> pandas.DataFrame:
+    """
+    clearing the table and inserting the 'bad' data
+    :param database_connection: DatabaseHandler instance
+    :return: alternative dataframe
+    """
     # clearing for bad insertion
     database_connection.clear_table('''DELETE FROM ''' + table_name)
     insert_bad_data()

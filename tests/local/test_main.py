@@ -63,7 +63,3 @@ def get_files_bad_name_table():
     _files = files.copy()
     _files[0][2] += "31"
     return _files
-
-
-
-
