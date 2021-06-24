@@ -3,7 +3,7 @@ import unittest
 from src.main import create_metadata, check_path, check_type, check_same_table_list
 
 
-def get_path_list():
+def get_path_list() -> list:
     return [["C:/Users/barel/Desktop/Files/invoices_2009.json", "JSON", "invoices"],
             ["C:/Users/barel/Desktop/Files/invoices_2010.json", "JSON", "invoices"],
             ["C:/Users/barel/Desktop/Files/invoices_2011.json", "JSON", "invoices"],
@@ -11,7 +11,7 @@ def get_path_list():
             ["C:/Users/barel/Desktop/Files/invoices_2013.csv", "CSV", "invoices"]]
 
 
-def get_bad_path_list():
+def get_bad_path_list() -> list:
     # hurting the data with random string
     return [["C:/Users/barel/Desktop/Files/invoices_2009.json", "JSON", "invoice"],
             ["C:/Users/barel/Desktop/Files/invoices_2010.json", "JSON", "invoices"],
@@ -21,12 +21,14 @@ def get_bad_path_list():
 
 
 class TestMain(unittest.TestCase):
-    def setUp(self):
+
+    @classmethod
+    def setUpClass(cls):
         """
         creating 1 good list of items and 1 good path
         """
-        self.data = ["C:/Users/barel/Desktop/Files/invoices_2009.json", "JSON", "invoices"]
-        self.path = os.path.normpath(self.data[0])
+        cls.data = ["C:/Users/barel/Desktop/Files/invoices_2009.json", "json", "invoices"]
+        cls.path = os.path.normpath(cls.data[0])
 
     def test_create_metadata(self):
         """
@@ -63,13 +65,13 @@ class TestMain(unittest.TestCase):
 
 
 # setup methods
-def get_bad_type(item: list):
+def get_bad_type(item: list) -> list:
     # hurting the data with random string
     item[1] += "3"
     return item
 
 
-def get_bad_path(item: str):
+def get_bad_path(item: str) -> str:
     # hurting the data with random string
     item += "21"
     return item

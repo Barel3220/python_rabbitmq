@@ -19,7 +19,7 @@ class DatabaseConsumer:
         """
         when the queue is receiving data the callback method is invoked
         :param channel: channel of communication
-        :type channel: pika.channel.Channel
+        :type channel: pika.channel.BlockingChannel
         :param method: used to acknowledge the message
         :type method: pika.spec.Basic.Deliver
         :param properties: user-defined properties on the message

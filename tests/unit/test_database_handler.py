@@ -2,7 +2,6 @@ import os
 import pandas
 import unittest
 from src.database_handler import DatabaseHandler
-
 database_path = os.path.normpath(os.path.pardir + os.path.join('/dummy_database/dummy.db'))
 table_name = "invoices_dummy"
 
@@ -20,14 +19,13 @@ class TestDatabaseHandler(unittest.TestCase):
 
     def setUp(self):
         """
-        setting up a database_handler object with the dummy database path
-        and connecting it
+        connecting to the database
         """
         self.database_connection.connect()
 
     def tearDown(self):
         """
-        tearing down the table, and closing the connection
+        tearing down the table (deleting all rows only), and closing the connection
         """
         # in case one of the methods closed the connection
         self.database_connection.connect()
@@ -75,7 +73,7 @@ class TestDatabaseHandler(unittest.TestCase):
         query = set_bad_insert_many()
         results = self.database_connection.insert_many(query, data)
         # 2
-        self.assertNotEqual(results, "Inserted 3 Records")
+        self.assertFalse(results)
 
     def test_to_dataframe(self):
         """
@@ -93,7 +91,7 @@ class TestDatabaseHandler(unittest.TestCase):
         headers = ['CustomId', 'InvoiceDate', 'Total']
         dataframe = self.database_connection.to_dataframe(headers, table_name)
         # 3
-        self.assertNotEqual(dataframe, 3)
+        self.assertFalse(dataframe)
 
     def test_create_table(self):
         """
@@ -105,7 +103,7 @@ class TestDatabaseHandler(unittest.TestCase):
         self.assertEqual(results, "1 Table Created Successfully")
         results = self.database_connection.create_table(create_table_query())
         # 2
-        self.assertNotEqual(results, "1 Table Created Successfully")
+        self.assertFalse(results)
         self.database_connection.clear_table('''DROP TABLE IF EXISTS dummy''')
 
     def test_clear_table(self):
@@ -120,7 +118,7 @@ class TestDatabaseHandler(unittest.TestCase):
         insert_dummy_data(self.database_connection)
         results = self.database_connection.clear_table('''DELETE FROM''' + table_name)
         # 2
-        self.assertNotEqual(results, "Deleted All Rows")
+        self.assertFalse(results)
 
     @classmethod
     def tearDownClass(cls):
@@ -133,13 +131,7 @@ class TestDatabaseHandler(unittest.TestCase):
 
 
 # setup methods
-def create_table_query():
-    return '''CREATE TABLE dummy 
-        (InvoiceId INTEGER, CustomerId INTEGER,
-        InvoiceDate TEXT, Total FLOAT)'''
-
-
-def setupclass_create_table(database_connection):
+def setupclass_create_table(database_connection: DatabaseHandler):
     """
     creating a table for all database testing
     :param database_connection: connection for connect, create and close
@@ -151,7 +143,7 @@ def setupclass_create_table(database_connection):
     database_connection.close()
 
 
-def insert_dummy_data(database_connection):
+def insert_dummy_data(database_connection: DatabaseHandler):
     """
     creating dummy data and inserting it to database for selecting it inn the test,
     connecting to the database after insertion to due closing inside
@@ -165,7 +157,13 @@ def insert_dummy_data(database_connection):
     database_connection.connect()
 
 
-def set_insert_many():
+def create_table_query() -> str:
+    return '''CREATE TABLE dummy 
+        (InvoiceId INTEGER, CustomerId INTEGER,
+        InvoiceDate TEXT, Total FLOAT)'''
+
+
+def set_insert_many() -> tuple:
     """
     creating dummy data and returning it for testing the insertion
     """
@@ -176,7 +174,7 @@ def set_insert_many():
     return query, data
 
 
-def set_bad_insert_many():
+def set_bad_insert_many() -> str:
     """
     creating bad dummy data and returning it for testing the insertion
     """

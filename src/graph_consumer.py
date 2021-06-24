@@ -28,7 +28,8 @@ class GraphConsumer:
         consume means to listen to the queue forever until some data comes,
         then process it, then continue listening
         """
-        self.channel.basic_consume(queue='database_to_graph', on_message_callback=graph_consumer_callback, auto_ack=True)
+        self.channel.basic_consume(queue='database_to_graph',
+                                   on_message_callback=graph_consumer_callback, auto_ack=True)
 
     def keep_consume(self):
         """

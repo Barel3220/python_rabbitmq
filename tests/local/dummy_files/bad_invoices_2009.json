@@ -1,0 +1,46 @@
+[
+    {
+        "BillingAddress": "Theodor-Heuss-Straße 34",
+        "BillingCity": "Stuttgart",
+        "BillingCountry": "Germany",
+        "BillingPostalCode": "70174",
+        "BillingState": "",
+        "CustomerId": "2",
+        "InvoiceDate": "2009-01-01 00:00:00",
+        "InvoiceId": "1",
+        "Total": "2055.98"
+    },
+    {
+        "BillingAddress": "Ullevålsveien 14",
+        "BillingCity": "Oslo",
+        "BillingCountry": "Norway",
+        "BillingPostalCode": "0171",
+        "BillingState": "",
+        "CustomerId": "4",
+        "InvoiceDate": "2009-01-02 00:00:00",
+        "InvoiceId": "2",
+        "Total": "1641.96"
+    },
+    {
+        "BillingAddress": "Grétrystraat 63",
+        "BillingCity": "Brussels",
+        "BillingCountry": "Belgium",
+        "BillingPostalCode": "1000",
+        "BillingState": "",
+        "CustomerId": "2",
+        "InvoiceDate": "2009-01-03 00:00:00",
+        "InvoiceId": "3",
+        "Total": "2759.94"
+    },
+    {
+        "BillingAddress": "8210 111 ST NW",
+        "BillingCity": "Edmonton",
+        "BillingCountry": "Canada",
+        "BillingPostalCode": "T6G 2C7",
+        "BillingState": "AB",
+        "CustomerId": "14",
+        "InvoiceDate": "2009-01-06 00:00:00",
+        "InvoiceId": "4",
+        "Total": "1740.91"
+    }
+]
